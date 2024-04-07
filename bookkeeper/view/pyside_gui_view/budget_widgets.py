@@ -19,5 +19,11 @@ class BudgetWidget(QtWidgets.QWidget):
         layout.addWidget(self.table)
         self.setLayout(layout)
 
+        self.table.setMinimumHeight(120)
+        self.setSizePolicy(
+            QtWidgets.QSizePolicy.Policy.MinimumExpanding,
+            QtWidgets.QSizePolicy.Policy.Maximum
+        )
+
     def set_item(self, i: int, j: int, text: str) -> None:
         self.table.setItem(i, j, QtWidgets.QTableWidgetItem(text))

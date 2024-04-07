@@ -34,6 +34,7 @@ class Presenter:
         self.view.register_delete_category_handler(self.delete_category)
         self.view.register_change_category_handler(self.change_category)
         self.view.register_get_categories_handler(self.get_categories)
+        self.view.register_get_children_handler(self.get_children)
         self.view.register_add_expense_handler(self.add_expense)
         self.view.register_change_expense_handler(self.change_expense)
         self.view.register_delete_expense_handler(self.delete_expense)
@@ -121,6 +122,13 @@ class Presenter:
         return [
             self._form_view_category(cat)
             for cat in self.model.category_model.get_all_categories()
+        ]
+    
+    def get_children(self, category_id: int) -> ViewCategory:
+        return [
+            self._form_view_category(child) 
+            for child in 
+            self.model.category_model.get_category_by_id(category_id).get_children()
         ]
 
     def add_expense(

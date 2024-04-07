@@ -1,6 +1,6 @@
 from __future__ import annotations
-from PySide6 import QtWidgets, QtCore, QtGui
 from typing import Callable, Optional
+from PySide6 import QtWidgets, QtCore, QtGui
 
 from bookkeeper.core import CategoryDeletePolicy, ExpensesHandlingPolicy
 from bookkeeper.view.view_data import ViewCategory

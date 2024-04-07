@@ -20,6 +20,14 @@ class ViewExpense():
     comment: str
 
 
+@dataclass
+class ViewBudget():
+    id: int
+    daily: str
+    weekly: str
+    monthly: str
+
+
 class ExpenseField(str, Enum):
     amount: str = "amount"
     category: str = "category"

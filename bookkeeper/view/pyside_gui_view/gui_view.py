@@ -1,11 +1,11 @@
 from __future__ import annotations
-from datetime import datetime
 import sys
-from bookkeeper.core import CategoryDeletePolicy, ExpensesHandlingPolicy
-from bookkeeper.view.abstract_view import AbstractView
+from datetime import datetime
 from typing import Callable, Any
 from PySide6 import QtWidgets
 
+from bookkeeper.core import CategoryDeletePolicy, ExpensesHandlingPolicy
+from bookkeeper.view.abstract_view import AbstractView
 from bookkeeper.view.view_data import ExpenseField, ViewExpense, ViewCategory
 from bookkeeper.view.pyside_gui_view.expenses_table_widgets import ExpensesTableWidget
 from bookkeeper.view.pyside_gui_view.expense_add_widgets import ExpenseAddWidget

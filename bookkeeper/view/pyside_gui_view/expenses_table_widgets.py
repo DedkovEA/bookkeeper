@@ -1,6 +1,6 @@
 from __future__ import annotations
-from PySide6 import QtWidgets, QtCore, QtGui
 from dataclasses import dataclass
+from PySide6 import QtWidgets, QtCore, QtGui
 from functools import partial
 from typing import Callable, ClassVar, Any
 

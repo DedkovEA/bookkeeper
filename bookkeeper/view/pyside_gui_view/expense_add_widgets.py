@@ -1,5 +1,6 @@
 from PySide6 import QtWidgets, QtCore
 from typing import Callable, Optional
+
 from bookkeeper.view.pyside_gui_view.category_select_widgets import (
     CategorySelectionWidget,
 )
