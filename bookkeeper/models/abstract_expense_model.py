@@ -6,7 +6,7 @@ from datetime import datetime
 from enum import Enum, IntFlag
 
 
-@dataclass(init=False) 
+@dataclass(init=False)
 class AbstractExpense(Protocol):
     """
     Расходная операция.
@@ -18,16 +18,17 @@ class AbstractExpense(Protocol):
     added_date - дата добавления в бд
     comment - комментарий
     """
+
     model: AbstractExpensesModel
     id: int
     amount: float
     # category: AbstractCategory
     expense_date: datetime = field(default_factory=datetime.now)
     added_date: datetime = field(default_factory=datetime.now)
-    comment: str = ''
+    comment: str = ""
 
     def set_attribute(self, attr_name: str, value: Any) -> None:
-        self.model.set_attributes(self, {attr_name : value})
+        self.model.set_attributes(self, {attr_name: value})
 
     def get_category(self) -> AbstractCategory:
         return self.model.get_expense_category(self)
@@ -54,41 +55,37 @@ class ExpenseField(str, Enum):
 
 
 @dataclass
-class ExpenseConstraint():
+class ExpenseConstraint:
     """
     A constraint for select_expenses_by_constraints model function
     expense_field: the name of attribute on which constraint is set
     constraint_type: like / eq / geq / greater / leq / lower
     expression: with which to compare
     """
+
     expense_field: ExpenseField
     constraint_type: ConstraintType
     expression: Any
-    
+
 
 class AbstractExpensesModel(Protocol):
-    def add_expense(self, amount: int, category: AbstractCategory, 
-                    expense_date: datetime) -> AbstractExpense:
-        ...
+    def add_expense(
+        self, amount: int, category: AbstractCategory, expense_date: datetime
+    ) -> AbstractExpense: ...
 
-    def delete_expense(self, expense: AbstractExpense) -> None:
-        ...
+    def delete_expense(self, expense: AbstractExpense) -> None: ...
 
-    def set_attributes(self, expense: AbstractExpense, 
-                       attr_dict: dict[ExpenseField, Any]) -> None:
-        ...
+    def set_attributes(
+        self, expense: AbstractExpense, attr_dict: dict[ExpenseField, Any]
+    ) -> None: ...
 
-    def get_expenses_by_ids(self, ids: list[int]) -> list[AbstractExpense]:
-        ...
+    def get_expenses_by_ids(self, ids: list[int]) -> list[AbstractExpense]: ...
 
     def get_expense_by_id(self, id: int) -> AbstractExpense:
         return self.get_expenses_by_ids([id])[0]
-    
-    def get_expenses_by_constraints(
-            self, 
-            constraints: list[ExpenseConstraint], 
-            max_num: Optional[int] = None) -> list[AbstractExpense]:
-        ...
 
-    def get_expense_category(self, expense: AbstractExpense) -> AbstractCategory:
-        ...
+    def get_expenses_by_constraints(
+        self, constraints: list[ExpenseConstraint], max_num: Optional[int] = None
+    ) -> list[AbstractExpense]: ...
+
+    def get_expense_category(self, expense: AbstractExpense) -> AbstractCategory: ...

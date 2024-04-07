@@ -13,10 +13,11 @@ class BudgetWidget(QtWidgets.QWidget):
         hheader.setSectionResizeMode(1, QtWidgets.QHeaderView.ResizeMode.Stretch)
         self.table.setVerticalHeaderLabels(["Day", "Week", "Month"])
         # TODO: change for changes in budget limits
-        self.table.setEditTriggers(QtWidgets.QAbstractItemView.EditTrigger.NoEditTriggers)
+        self.table.setEditTriggers(
+            QtWidgets.QAbstractItemView.EditTrigger.NoEditTriggers
+        )
         layout.addWidget(self.table)
         self.setLayout(layout)
-    
+
     def set_item(self, i: int, j: int, text: str) -> None:
         self.table.setItem(i, j, QtWidgets.QTableWidgetItem(text))
-

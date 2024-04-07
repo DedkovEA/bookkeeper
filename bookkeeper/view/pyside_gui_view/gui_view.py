@@ -38,56 +38,70 @@ class GUI_Based_View(AbstractView):
         return self.central_widget.expenses_table_widget.expenses_shown()
 
     def refresh_categories(self, root_categories: list[ViewCategory]) -> None:
-        self.central_widget.expense_add_widget.\
-            category_selection.refresh_categories_list(root_categories)
+        self.central_widget.expense_add_widget.category_selection.refresh_categories_list(
+            root_categories
+        )
 
     def update_categories(self, categories: list[ViewCategory]) -> None:
-        self.central_widget.expense_add_widget.\
-            category_selection.update_categories_list(categories)
+        self.central_widget.expense_add_widget.category_selection.update_categories_list(
+            categories
+        )
 
     def remove_categories(self, categories: list[int]) -> None:
-        self.central_widget.expense_add_widget.\
-            category_selection.remove_categories(categories)
+        self.central_widget.expense_add_widget.category_selection.remove_categories(
+            categories
+        )
 
     # Binding handlers from protocol
 
     def register_add_category_handler(
-            self,
-            handler: Callable[[str, int | None], None]) -> None:
-        self.central_widget.expense_add_widget.\
-            category_selection.register_category_add_handler(handler)
+        self, handler: Callable[[str, int | None], None]
+    ) -> None:
+        self.central_widget.expense_add_widget.category_selection.\
+            register_category_add_handler(
+                handler
+            )
 
     def register_delete_category_handler(
-            self,
-            handler: Callable[[int,
-                               CategoryDeletePolicy,
-                               ExpensesHandlingPolicy], None]) -> None:
-        self.central_widget.expense_add_widget.\
-            category_selection.register_category_delete_handler(handler)
+        self,
+        handler: Callable[[int, CategoryDeletePolicy, ExpensesHandlingPolicy], None],
+    ) -> None:
+        self.central_widget.expense_add_widget.category_selection.\
+            register_category_delete_handler(
+                handler
+            )
 
     def register_change_category_handler(
-            self,
-            handler: Callable[[ViewCategory], None]) -> None:
-        self.central_widget.expense_add_widget.\
-            category_selection.register_category_update_handler(handler)
+        self, handler: Callable[[ViewCategory], None]
+    ) -> None:
+        self.central_widget.expense_add_widget.category_selection.\
+            register_category_update_handler(
+                handler
+            )
 
     def register_get_categories_handler(
-            self,
-            handler: Callable[[], list[ViewCategory]]) -> None:
-        self.central_widget.expenses_table_widget.register_get_categories_handler(handler)
+        self, handler: Callable[[], list[ViewCategory]]
+    ) -> None:
+        self.central_widget.expenses_table_widget.register_get_categories_handler(
+            handler
+        )
 
     def register_add_expense_handler(
-            self,
-            handler: Callable[[int, int, datetime | None, str], None]) -> None:
+        self, handler: Callable[[int, int, datetime | None, str], None]
+    ) -> None:
         self.central_widget.expense_add_widget.register_expense_add_handler(handler)
 
     def register_change_expense_handler(
-            self,
-            handler: Callable[[int, dict[ExpenseField, Any]], None]) -> None:
-        self.central_widget.expenses_table_widget.register_expense_update_handler(handler)
+        self, handler: Callable[[int, dict[ExpenseField, Any]], None]
+    ) -> None:
+        self.central_widget.expenses_table_widget.register_expense_update_handler(
+            handler
+        )
 
     def register_delete_expense_handler(self, handler: Callable[[int], None]) -> None:
-        self.central_widget.expenses_table_widget.register_delete_expense_handler(handler)
+        self.central_widget.expenses_table_widget.register_delete_expense_handler(
+            handler
+        )
 
 
 class BookKeeperLayout(QtWidgets.QWidget):

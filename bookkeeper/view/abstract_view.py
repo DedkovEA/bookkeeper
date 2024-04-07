@@ -1,7 +1,10 @@
-from typing import Callable, Protocol, Dict, Optional, Any
-from datetime import datetime
+from typing import Callable, Protocol, Optional, Any
 from bookkeeper.core import CategoryDeletePolicy, ExpensesHandlingPolicy
-from bookkeeper.view.view_data import ViewCategory, ViewExpense, ExpenseFilter, ExpenseField
+from bookkeeper.view.view_data import (
+    ViewCategory,
+    ViewExpense,
+    ExpenseField,
+)
 
 
 class AbstractView(Protocol):
@@ -11,8 +14,7 @@ class AbstractView(Protocol):
         """
         ...
 
-    def start(self) -> None:
-        ...
+    def start(self) -> None: ...
 
     def refresh_expenses_table(self, expenses: list[ViewExpense]) -> None:
         """
@@ -45,7 +47,7 @@ class AbstractView(Protocol):
     def refresh_categories(self, categories: list[ViewCategory]) -> None:
         """
         Updates all categories (displays initial layout with whole tree rebuilt).
-        All categories which you want to shown should be provided, 
+        All categories which you want to shown should be provided,
         all the others will be skipped while building initial category list.
         """
         ...
@@ -60,9 +62,9 @@ class AbstractView(Protocol):
 
     def remove_categories(self, categories: list[int]) -> None:
         """
-        Removes categories provided from tree by their ids, moving their children to 
+        Removes categories provided from tree by their ids, moving their children to
         their parents.
-        If there is no some of the categories, 
+        If there is no some of the categories,
         then removes whatever it can and raises GUIRemoveError
         """
         ...
@@ -70,8 +72,8 @@ class AbstractView(Protocol):
     # Methods for notifying Presenter
 
     def register_add_category_handler(
-            self,
-            handler: Callable[[str, Optional[int]], None]) -> None:
+        self, handler: Callable[[str, Optional[int]], None]
+    ) -> None:
         """
         Register handler for category addition in the form:
         handler ~ add_category(category_name, parent_category_id)
@@ -79,21 +81,19 @@ class AbstractView(Protocol):
         ...
 
     def register_delete_category_handler(
-            self,
-            handler: Callable[[int, 
-                               CategoryDeletePolicy,
-                               ExpensesHandlingPolicy],
-                              None]) -> None:
+        self,
+        handler: Callable[[int, CategoryDeletePolicy, ExpensesHandlingPolicy], None],
+    ) -> None:
         """
         Register handler for category addition in the form:
-        handler ~ delete_category(category_id, category_delete_policy, 
+        handler ~ delete_category(category_id, category_delete_policy,
         expenses_handling_policy)
         """
         ...
 
     def register_change_category_handler(
-            self,
-            handler: Callable[[ViewCategory], None]) -> None:
+        self, handler: Callable[[ViewCategory], None]
+    ) -> None:
         """
         Register handler for category addition in the form:
         handler ~ change_category(view_category (with id))
@@ -101,8 +101,8 @@ class AbstractView(Protocol):
         ...
 
     def register_get_children_handler(
-            self,
-            handler: Callable[[int], ViewCategory]) -> None:
+        self, handler: Callable[[int], ViewCategory]
+    ) -> None:
         """
         Register handler for category addition in the form:
         handler ~ change_category(view_category (with id))
@@ -110,9 +110,8 @@ class AbstractView(Protocol):
         ...
 
     def register_add_expense_handler(
-            self,
-            handler: Callable[[str, int, Optional[str], str],
-                              None]) -> None:
+        self, handler: Callable[[str, int, Optional[str], str], None]
+    ) -> None:
         """
         Register handler for expense addition in the form:
         handler ~ add_expense(amount, category_id, expense_date=None, comment="")
@@ -127,8 +126,8 @@ class AbstractView(Protocol):
         ...
 
     def register_change_expense_handler(
-            self,
-            handler: Callable[[int, dict[ExpenseField, Any]], None]) -> None:
+        self, handler: Callable[[int, dict[ExpenseField, Any]], None]
+    ) -> None:
         """
         Register handler for expense addition in the form:
         handler ~ change_expense(expense_id, {field: value})
@@ -136,8 +135,8 @@ class AbstractView(Protocol):
         ...
 
     def register_get_categories_handler(
-            self, 
-            handler: Callable[[], list[ViewCategory]]) -> None:
+        self, handler: Callable[[], list[ViewCategory]]
+    ) -> None:
         """
         Register handler returning list of all existing categories.
         """

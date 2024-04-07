@@ -1,17 +1,16 @@
 from __future__ import annotations
-from bookkeeper.core import CategoryDeletePolicy, ExpensesHandlingPolicy
-from bookkeeper.view.abstract_view import *
-from PySide6 import QtWidgets, QtCore, QtGui, QtQuick
+from PySide6 import QtWidgets, QtCore, QtGui
+from typing import Callable, Optional
 
-from bookkeeper.view.view_data import ViewExpense, ViewCategory
-from bookkeeper.exceptions import GUIInsertionError, GUIUpdateError, GUIRemoveError
+from bookkeeper.core import CategoryDeletePolicy, ExpensesHandlingPolicy
+from bookkeeper.view.view_data import ViewCategory
 from bookkeeper.view.pyside_gui_view.utility_widgets import LineEditsWithCaptions
+from bookkeeper.exceptions import GUIInsertionError, GUIRemoveError
 
 
 class CategoryTreeItem(QtWidgets.QTreeWidgetItem):
 
-    def __init__(self, category: ViewCategory, *args,
-                 editable: bool = True, **kwargs):
+    def __init__(self, category: ViewCategory, *args, editable: bool = True, **kwargs):
         super().__init__([category.name], *args, **kwargs)
         if editable:
             self.setFlags(self.flags() | QtCore.Qt.ItemFlag.ItemIsEditable)
@@ -21,7 +20,7 @@ class CategoryTreeItem(QtWidgets.QTreeWidgetItem):
 
 
 class CategorySelectionWidget(QtWidgets.QTreeWidget):
-    def __init__(self, *args, editable: bool = True,  **kwargs):
+    def __init__(self, *args, editable: bool = True, **kwargs):
         super().__init__(*args, **kwargs)
         if editable:
             self.editable_categories = True
@@ -75,11 +74,11 @@ class CategorySelectionWidget(QtWidgets.QTreeWidget):
         else:
             return False
         return True
-    
+
     def update_category(self, category: ViewCategory) -> bool:
-        if not category.id in self.shown_categories:
+        if category.id not in self.shown_categories:
             return False
-        if not category.parent in self.shown_categories and category.parent is not None:
+        if category.parent not in self.shown_categories and category.parent is not None:
             return False
         cur_cat = self.shown_categories[category.id]
         cur_cat.setText(0, category.name)
@@ -89,9 +88,8 @@ class CategorySelectionWidget(QtWidgets.QTreeWidget):
             parent = self.shown_categories[category.parent]
             if cur_parent != parent:
                 if cur_parent is None:
-                    move_cat = self.takeTopLevelItem(
-                        self.indexOfTopLevelItem(cur_cat))
-                else:    
+                    move_cat = self.takeTopLevelItem(self.indexOfTopLevelItem(cur_cat))
+                else:
                     move_cat = cur_parent.takeChild(cur_parent.indexOfChild(cur_cat))
                 parent.addChild(move_cat)
                 assert move_cat == cur_cat
@@ -105,11 +103,6 @@ class CategorySelectionWidget(QtWidgets.QTreeWidget):
 
     def add_categories(self, categories: list[ViewCategory]) -> None:
         not_inserted = categories.copy()
-        # for category in categories:
-        #     if not (category.parent in self.shown_categories or category.parent == None):
-        #         not_inserted.append(category)
-        #         continue
-        #     self.add_category(category)
 
         # Protection against infinite loop
         k = 0
@@ -121,8 +114,12 @@ class CategorySelectionWidget(QtWidgets.QTreeWidget):
                 continue
             k = 0
         if k > 0:
-            raise GUIInsertionError(("Some categories can not be inserted, since "
-                                     "no parents are provided for them."))
+            raise GUIInsertionError(
+                (
+                    "Some categories can not be inserted, since "
+                    "no parents are provided for them."
+                )
+            )
 
     def update_categories_list(self, categories: list[ViewCategory]) -> None:
         cats_to_add = []
@@ -149,14 +146,13 @@ class CategorySelectionWidget(QtWidgets.QTreeWidget):
                 parent.removeChild(cat_to_del)
                 parent.addChildren(children)
             else:
-                self.takeTopLevelItem(
-                    self.indexOfTopLevelItem(cat_to_del))
+                self.takeTopLevelItem(self.indexOfTopLevelItem(cat_to_del))
                 self.addTopLevelItems(children)
             del self.shown_categories[category]
             return True
         else:
             return False
-    
+
     # Widget methods
     def current_category_id(self) -> Optional[int]:
         if self.currentItem() is not None:
@@ -183,7 +179,7 @@ class CategorySelectionWidget(QtWidgets.QTreeWidget):
         del_cat_act.triggered.connect(self._invoke_deletion_slot)
         context_menu.addAction(del_cat_act)
         context_menu.exec(self.mapToGlobal(pos))
-    
+
     # Category creation slots
     @QtCore.Slot()
     def _invoke_creation_slot(self) -> None:
@@ -210,14 +206,17 @@ class CategorySelectionWidget(QtWidgets.QTreeWidget):
         dialog.exec()
 
     @QtCore.Slot()
-    def _delete_category_slot(self, 
-                              children_policy: CategoryDeletePolicy, 
-                              expenses_policy: ExpensesHandlingPolicy) -> None:
+    def _delete_category_slot(
+        self,
+        children_policy: CategoryDeletePolicy,
+        expenses_policy: ExpensesHandlingPolicy,
+    ) -> None:
         if self.currentItem() == self._root:
             pass
         else:
-            self._category_delete_handler(self.currentItem().id, 
-                                          children_policy, expenses_policy)
+            self._category_delete_handler(
+                self.currentItem().id, children_policy, expenses_policy
+            )
 
     # Category update slots
     @QtCore.Slot()
@@ -233,26 +232,26 @@ class CategorySelectionWidget(QtWidgets.QTreeWidget):
 
     #  Register some handlers for functionality
     def register_category_add_handler(
-            self,
-            handler: Callable[[str, Optional[int]], None]) -> None:
+        self, handler: Callable[[str, Optional[int]], None]
+    ) -> None:
         self._category_add_handler = handler
 
     def register_category_delete_handler(
-            self,
-            handler: Callable[[int, 
-                               CategoryDeletePolicy, 
-                               ExpensesHandlingPolicy], None]) -> None:
+        self,
+        handler: Callable[[int, CategoryDeletePolicy, ExpensesHandlingPolicy], None],
+    ) -> None:
         self._category_delete_handler = handler
 
     def register_category_update_handler(
-            self, 
-            handler: Callable[[ViewCategory], None]) -> None:
+        self, handler: Callable[[ViewCategory], None]
+    ) -> None:
         self._category_update_handler = handler
 
 
 ###################################################################################
 #          Dialogs associated with operations on categories definition            #
 ###################################################################################
+
 
 class CategoryCreationDialog(QtWidgets.QDialog):
     parameters_entered = QtCore.Signal(str)
@@ -261,15 +260,17 @@ class CategoryCreationDialog(QtWidgets.QDialog):
         super().__init__(*args, **kwargs)
         self.setWindowTitle("New category creation")
 
-        QBtn = QtWidgets.QDialogButtonBox.StandardButton.Ok | \
-               QtWidgets.QDialogButtonBox.StandardButton.Cancel
+        QBtn = (
+            QtWidgets.QDialogButtonBox.StandardButton.Ok
+            | QtWidgets.QDialogButtonBox.StandardButton.Cancel
+        )
 
         self.buttonBox = QtWidgets.QDialogButtonBox(QBtn)
         self.buttonBox.accepted.connect(self.accept)
         self.buttonBox.rejected.connect(self.reject)
 
         self.layout = QtWidgets.QVBoxLayout()
-        
+
         (name_le, name_layout) = LineEditsWithCaptions(["Name"])
         self.name_lineedit = name_le[0]
         self.layout.addLayout(name_layout)
@@ -289,8 +290,10 @@ class CategoryDeletionDialog(QtWidgets.QDialog):
         super().__init__(*args, **kwargs)
         self.setWindowTitle("New category creation")
 
-        QBtn = QtWidgets.QDialogButtonBox.StandardButton.Ok | \
-               QtWidgets.QDialogButtonBox.StandardButton.Cancel
+        QBtn = (
+            QtWidgets.QDialogButtonBox.StandardButton.Ok
+            | QtWidgets.QDialogButtonBox.StandardButton.Cancel
+        )
 
         self.buttonBox = QtWidgets.QDialogButtonBox(QBtn)
         self.buttonBox.accepted.connect(self.accept)
@@ -300,7 +303,8 @@ class CategoryDeletionDialog(QtWidgets.QDialog):
 
         children_policy_layout = QtWidgets.QVBoxLayout()
         children_policy_layout.addWidget(
-            QtWidgets.QLabel("What to do with children categories?"))
+            QtWidgets.QLabel("What to do with children categories?")
+        )
         self.delete_children_RB = QtWidgets.QRadioButton("Delete recursively")
         self.move_children_RB = QtWidgets.QRadioButton("Move to parent category")
         self.children_group = QtWidgets.QButtonGroup()
@@ -311,7 +315,8 @@ class CategoryDeletionDialog(QtWidgets.QDialog):
 
         expenses_policy_layout = QtWidgets.QVBoxLayout()
         expenses_policy_layout.addWidget(
-            QtWidgets.QLabel("What to do with expenses in deleted categories?"))
+            QtWidgets.QLabel("What to do with expenses in deleted categories?")
+        )
         self.delete_expenses_RB = QtWidgets.QRadioButton("Delete")
         self.move_expenses_RB = QtWidgets.QRadioButton("Move to parent category")
         self.expenses_group = QtWidgets.QButtonGroup()
@@ -340,13 +345,15 @@ class CategoryDeletionDialog(QtWidgets.QDialog):
 
 class CategorySelectionDialog(QtWidgets.QDialog):
     category_selected = QtCore.Signal(int)
-    
+
     def __init__(self, categories: list[ViewCategory], *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.setWindowTitle("Select category")
 
-        QBtn = QtWidgets.QDialogButtonBox.StandardButton.Ok | \
-               QtWidgets.QDialogButtonBox.StandardButton.Cancel
+        QBtn = (
+            QtWidgets.QDialogButtonBox.StandardButton.Ok
+            | QtWidgets.QDialogButtonBox.StandardButton.Cancel
+        )
 
         self.buttonBox = QtWidgets.QDialogButtonBox(QBtn)
         self.buttonBox.accepted.connect(self.accept)
@@ -358,7 +365,7 @@ class CategorySelectionDialog(QtWidgets.QDialog):
         self.layout.addWidget(self.category_selection_wdg)
         self.layout.addWidget(self.buttonBox)
         self.setLayout(self.layout)
-        
+
         # Some error messages
         self.none_category_error_msg = QtWidgets.QErrorMessage(self)
         self.none_category_error_msg.setWindowTitle("Error")

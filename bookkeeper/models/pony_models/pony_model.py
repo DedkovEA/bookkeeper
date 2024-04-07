@@ -1,11 +1,8 @@
 from datetime import datetime
-import typing
-from pony.orm import *
+from pony.orm import Database, Required, PrimaryKey, Optional, Set
 from bookkeeper.models.abstract_model import AbstractModel
-from bookkeeper.models.pony_models.pony_category_model import \
-                                                        PonyCategoryModel
-from bookkeeper.models.pony_models.pony_expenses_model import \
-                                                        PonyExpensesModel
+from bookkeeper.models.pony_models.pony_category_model import PonyCategoryModel
+from bookkeeper.models.pony_models.pony_expenses_model import PonyExpensesModel
 
 
 def define_database(**dbparams) -> Database:
@@ -15,9 +12,9 @@ def define_database(**dbparams) -> Database:
         # __metaclass__ = classmaker()
         id = PrimaryKey(int, auto=True)
         name = Required(str)
-        expenses = Set('Expense')
-        parent = Optional('Category', reverse='children')
-        children = Set('Category', reverse='parent')
+        expenses = Set("Expense")
+        parent = Optional("Category", reverse="children")
+        children = Set("Category", reverse="parent")
 
     class Budget(db.Entity):
         preset = PrimaryKey(str)
