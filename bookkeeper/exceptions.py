@@ -24,3 +24,11 @@ class GUIUpdateError(GUIError):
 
 class GUIRemoveError(GUIError):
     ...
+
+
+class NoAccessError(Exception):
+    ...
+
+
+class NoAccessToGenericValuesError(NoAccessError):
+    ...

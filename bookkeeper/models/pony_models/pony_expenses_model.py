@@ -1,5 +1,5 @@
 from __future__ import annotations
-from pony.orm import db_session, Database, ObjectNotFound
+from pony.orm import db_session, Database, ObjectNotFound, select, desc
 import typing
 from typing_extensions import Self
 from dataclasses import dataclass
@@ -75,6 +75,15 @@ class PonyExpensesModel(AbstractExpensesModel):
         expense.comment = "DELETED"
 
     @db_session
+    def delete_expenses(self, expenses: list[PonyExpense]) -> None:
+        for expense in expenses:
+            self.db.Expense[expense.id].delete()
+            # Corrupt deleted object
+            expense.id = None
+            # expense.category = None
+            expense.comment = "DELETED"
+
+    @db_session
     def get_expenses_by_ids(self, ids: list[int]) -> list[PonyExpense]:
         result = []
         fail = False
@@ -130,20 +139,15 @@ class PonyExpensesModel(AbstractExpensesModel):
                         flags[2],
                     )
                 )
+        # TODO : Add possibility for result sorting in abstract model
+        query = query.order_by(lambda e: desc(e.expense_date))
 
-        # def constraint_filter(expense: self.db.Expense):
-        #     for c in constraints:
-        #         if not self._check_constraint(c, expense):
-        #             return False
-        # expenses_got = self.db.Expense.select(constraint_filter)
         if max_num is None or max_num < 0:
             expenses_got = query[:]
         else:
             expenses_got = query[:max_num]
         result = []
         for exps in expenses_got:
-            # atrs = exps.to_dict(exclude="category")
-            # result.append(PonyExpense(model=self, **atrs))
             result.append(self._form_ponyexpense(exps))
         return result
 
@@ -184,6 +188,16 @@ class PonyExpensesModel(AbstractExpensesModel):
         return self.model.category_model.get_category_by_id(
             self.db.Expense[expense.id].category.id
         )
+
+    @db_session
+    def get_expense_amount_by_time_period(self, start: datetime, end: datetime) -> float:
+        result = select(
+            sum(exp.amount) for exp in self.db.Expense
+            if exp.expense_date >= start and exp.expense_date <= end
+        ).first()
+        if result is None:
+            return 0
+        return result
 
     # Utility functions
     @db_session

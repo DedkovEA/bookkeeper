@@ -23,9 +23,12 @@ class ViewExpense():
 @dataclass
 class ViewBudget():
     id: int
+    caption: str
     daily: str
     weekly: str
     monthly: str
+    exceeded: list[bool]
+    editable: bool = True
 
 
 class ExpenseField(str, Enum):

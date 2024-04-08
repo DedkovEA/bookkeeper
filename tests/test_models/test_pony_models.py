@@ -495,6 +495,13 @@ class TestExpense:
             )
         ) == set(expenses_for_test)
 
+    def test_get_expense_amount_by_time_period(
+            self, exp_model, expenses_for_test
+    ):
+        assert exp_model.get_expense_amount_by_time_period(
+            datetime(2000, 1, 1, 12, 0), datetime(2002, 3, 3, 12, 0)
+        ) == 700700*3 + 3
+
     # def test_get_parent(self, cat_model):
     #     c1 = cat_model.add_category('parent')
     #     c2 = cat_model.add_category('name', parent=c1)

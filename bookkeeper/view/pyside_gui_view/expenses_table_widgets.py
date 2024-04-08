@@ -20,6 +20,7 @@ class ExpenseTableItem(QtWidgets.QTableWidgetItem):
 
 @dataclass
 class ExpenseTableRowItem:
+    id: int
     expense_date: ExpenseTableItem
     amount: ExpenseTableItem
     category: ExpenseTableItem
@@ -103,13 +104,6 @@ class ExpensesTableWidget(QtWidgets.QWidget):
         self.data_error_msg.setWindowTitle("Error")
 
         # Confirmation message
-        # self.delete_confirmation_msg = QtWidgets.QMessageBox(self)
-        # self.delete_confirmation_msg.setWindowTitle("Confirm action")
-        # self.delete_confirmation_msg.setText("This action can not be undone. Proceed?")
-        # self.delete_confirmation_msg.setStandardButtons(
-        #     QtWidgets.QMessageBox.StandardButton.Yes |
-        #     QtWidgets.QMessageBox.StandardButton.No)
-        # self.delete_confirmation_msg.setIcon(QtWidgets.QMessageBox.Icon.Question)
         self.delete_confirmation_msg = ConfirmationMessageBox(
             "This action can not be undone. Proceed?"
         )
@@ -149,8 +143,17 @@ class ExpensesTableWidget(QtWidgets.QWidget):
     def add_expenses(self, expenses: list[ViewExpense]) -> None:
         init_row_count = self.table.rowCount()
         self.table.setRowCount(init_row_count + len(expenses))
+        failed = 0
         for i in range(len(expenses)):
-            self.set_row(init_row_count + i, expenses[i])
+            try:
+                self.set_row(init_row_count + i - failed, expenses[i])
+            except GUIInsertionError:
+                failed += 1
+        if failed > 0:
+            self.table.setRowCount(init_row_count + len(expenses) - failed)
+            raise GUIInsertionError(
+                "While adding expenses some of them already were in table"
+            )
 
     def remove_expenses(self, expenses: list[int]) -> None:
         failed = False
@@ -171,7 +174,6 @@ class ExpensesTableWidget(QtWidgets.QWidget):
     # Slots
     @QtCore.Slot()
     def _item_change_slot(self, item: ExpenseTableItem) -> None:
-        print("item changed")
         field = ExpenseTableRowItem.column_mapping[self.table.column(item)]
         id = item.id
         if field == ExpenseField.category:
@@ -217,7 +219,15 @@ class ExpensesTableWidget(QtWidgets.QWidget):
             self.delete_confirmation_msg.exec()
             == QtWidgets.QMessageBox.StandardButton.Yes
         ):
-            self._delete_expense_handler(self.context_menu_executed_item.id)
+            selected = self.table.selectedItems()
+            for_deletion: list[int] = []
+            # if len(selected) > 1:
+            for item in selected:
+                if item.id not in for_deletion:
+                    for_deletion.append(item.id)
+            self._delete_expenses_handler(for_deletion)
+            # else:
+            #     self._delete_expenses_handler([self.context_menu_executed_item.id])
 
     # Register handlers
     def register_expense_update_handler(
@@ -230,8 +240,10 @@ class ExpensesTableWidget(QtWidgets.QWidget):
     ) -> None:
         self._get_categories_handler = handler
 
-    def register_delete_expense_handler(self, handler: Callable[[int], None]) -> None:
-        self._delete_expense_handler = handler
+    def register_delete_expenses_handler(
+            self, handler: Callable[[list[int]], None]
+    ) -> None:
+        self._delete_expenses_handler = handler
 
     # Utility functions
     def _form_view_expense(self, expense: ExpenseTableRowItem) -> ViewExpense:

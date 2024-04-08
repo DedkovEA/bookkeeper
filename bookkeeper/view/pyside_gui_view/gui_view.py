@@ -6,7 +6,7 @@ from PySide6 import QtWidgets
 
 from bookkeeper.core import CategoryDeletePolicy, ExpensesHandlingPolicy
 from bookkeeper.view.abstract_view import AbstractView
-from bookkeeper.view.view_data import ExpenseField, ViewExpense, ViewCategory
+from bookkeeper.view.view_data import ExpenseField, ViewBudget, ViewExpense, ViewCategory
 from bookkeeper.view.pyside_gui_view.expenses_table_widgets import ExpensesTableWidget
 from bookkeeper.view.pyside_gui_view.expense_add_widgets import ExpenseAddWidget
 from bookkeeper.view.pyside_gui_view.budget_widgets import BudgetWidget
@@ -52,6 +52,15 @@ class GUI_Based_View(AbstractView):
             categories
         )
 
+    def refresh_budgets(self, budgets: list[ViewBudget]) -> None:
+        self.central_widget.budget_widget.refresh_budgets(budgets)
+
+    def update_budgets(self, budgets: list[ViewBudget]) -> None:
+        self.central_widget.budget_widget.update_budgets(budgets)
+
+    def remove_budgets(self, budget_ids: list[int]) -> None:
+        self.central_widget.budget_widget.remove_budgets(budget_ids)
+
     # Binding handlers from protocol
 
     def register_add_category_handler(
@@ -86,6 +95,14 @@ class GUI_Based_View(AbstractView):
             handler
         )
 
+    def register_get_category_children_handler(
+        self, handler: Callable[[], list[ViewCategory]]
+    ) -> None:
+        self.central_widget.expense_add_widget.\
+            category_selection.register_get_category_children_handler(
+                handler
+            )
+
     def register_add_expense_handler(
         self, handler: Callable[[int, int, datetime | None, str], None]
     ) -> None:
@@ -98,10 +115,17 @@ class GUI_Based_View(AbstractView):
             handler
         )
 
-    def register_delete_expense_handler(self, handler: Callable[[int], None]) -> None:
-        self.central_widget.expenses_table_widget.register_delete_expense_handler(
+    def register_delete_expenses_handler(
+            self, handler: Callable[[list[int]], None]
+    ) -> None:
+        self.central_widget.expenses_table_widget.register_delete_expenses_handler(
             handler
         )
+
+    def register_change_budget_handler(
+        self, handler: Callable[[str, str, str, str], None]
+    ) -> None:
+        self.central_widget.budget_widget.register_budget_update_handler(handler)
 
 
 class BookKeeperLayout(QtWidgets.QWidget):

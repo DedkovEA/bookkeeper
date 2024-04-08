@@ -4,6 +4,7 @@ from bookkeeper.view.view_data import (
     ViewCategory,
     ViewExpense,
     ExpenseField,
+    ViewBudget,
 )
 
 
@@ -69,6 +70,26 @@ class AbstractView(Protocol):
         """
         ...
 
+    def refresh_budgets(self, budgets: list[ViewBudget]) -> None:
+        """
+        Erases all budgets shown. Show all provided budgets.
+        """
+        ...
+
+    def update_budgets(self, budgets: list[ViewBudget]) -> None:
+        """
+        Updates shown budgets by their ids (in ViewBudget object).
+        If there is no such budget, then add them and show.
+        """
+        ...
+
+    def remove_budgets(self, budget_ids: list[int]) -> None:
+        """
+        Removes budgets by their ids.
+        Raises GUIRemoveError if there is no such budgets shown.
+        """
+        ...
+
     # Methods for notifying Presenter
 
     def register_add_category_handler(
@@ -100,8 +121,8 @@ class AbstractView(Protocol):
         """
         ...
 
-    def register_get_children_handler(
-        self, handler: Callable[[int], ViewCategory]
+    def register_get_category_children_handler(
+        self, handler: Callable[[int], list[ViewCategory]]
     ) -> None:
         """
         Register handler for category addition in the form:
@@ -118,9 +139,11 @@ class AbstractView(Protocol):
         """
         ...
 
-    def register_delete_expense_handler(self, handler: Callable[[int], None]) -> None:
+    def register_delete_expenses_handler(
+            self, handler: Callable[[list[int]], None]
+    ) -> None:
         """
-        Register handler for expense addition in the form:
+        Register handler for expense deletion in the form:
         handler ~ delete_expense(expense_id)
         """
         ...
@@ -129,7 +152,7 @@ class AbstractView(Protocol):
         self, handler: Callable[[int, dict[ExpenseField, Any]], None]
     ) -> None:
         """
-        Register handler for expense addition in the form:
+        Register handler for expense changing in the form:
         handler ~ change_expense(expense_id, {field: value})
         """
         ...
@@ -139,5 +162,32 @@ class AbstractView(Protocol):
     ) -> None:
         """
         Register handler returning list of all existing categories.
+        """
+        ...
+
+    def register_add_budget_handler(
+        self, handler: Callable[[str, str, str, str], None]
+    ) -> None:
+        """
+        Register handler for budget addition in the form:
+        handler ~ add_budget(caption, daily, weekly, monthly)
+        """
+        ...
+
+    def register_delete_budget_handler(self, handler: Callable[[int], None]) -> None:
+        """
+        Register handler for budget deletion in the form:
+        handler ~ delete_budget(budget_id)
+        """
+        ...
+
+    def register_change_budget_handler(
+        self, handler: Callable[[int, dict[str, str]], None]
+    ) -> None:
+        """
+        Register handler for budget addition in the form:
+        handler ~ change_expense(budget_id, dict{field: value})
+        Field names are the same, as in ViewBudget fields
+        Field editable and id is never in dict
         """
         ...

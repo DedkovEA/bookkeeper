@@ -22,10 +22,12 @@ class ExpenseAddWidget(QtWidgets.QWidget):
         self.amount.setCursorPosition(0)
         self.amount.setFocus()
         self.amount.setAlignment(QtCore.Qt.AlignmentFlag.AlignLeft)
+        self.amount.returnPressed.connect(self._invoke_expense_addition)
 
         self.category_selection = CategorySelectionWidget()
 
         self.add_button = QtWidgets.QPushButton("Add")
+        self.add_button.setDefault(True)
         blayout.addWidget(self.amount, 0, 1)
         blayout.addWidget(self.category_selection, 1, 0, 1, 2)
         blayout.addWidget(self.add_button, 2, 0, 1, 2)

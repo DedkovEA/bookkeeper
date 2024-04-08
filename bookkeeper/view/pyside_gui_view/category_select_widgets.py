@@ -201,6 +201,16 @@ class CategorySelectionWidget(QtWidgets.QTreeWidget):
     # Category deletion slots
     @QtCore.Slot()
     def _invoke_deletion_slot(self) -> None:
+        if self.context_menu_executed_item is None:
+            return
+        if len(self._get_category_children_handler(
+            self.context_menu_executed_item.id
+        )) == 0:
+            self._delete_category_slot(
+                CategoryDeletePolicy.delete,
+                ExpensesHandlingPolicy.delete,
+            )
+            return
         dialog = CategoryDeletionDialog()
         dialog.parameters_entered.connect(self._delete_category_slot)
         dialog.exec()
@@ -211,12 +221,15 @@ class CategorySelectionWidget(QtWidgets.QTreeWidget):
         children_policy: CategoryDeletePolicy,
         expenses_policy: ExpensesHandlingPolicy,
     ) -> None:
-        if self.currentItem() == self._root:
-            pass
-        else:
-            self._category_delete_handler(
-                self.currentItem().id, children_policy, expenses_policy
-            )
+        self._category_delete_handler(
+            self.context_menu_executed_item.id, children_policy, expenses_policy
+        )
+        # if self.currentItem() == self._root:
+        #     pass
+        # else:
+        #     self._category_delete_handler(
+        #         self.currentItem().id, children_policy, expenses_policy
+        #     )
 
     # Category update slots
     @QtCore.Slot()
@@ -246,6 +259,11 @@ class CategorySelectionWidget(QtWidgets.QTreeWidget):
         self, handler: Callable[[ViewCategory], None]
     ) -> None:
         self._category_update_handler = handler
+
+    def register_get_category_children_handler(
+        self, handler: Callable[[int], list[ViewCategory]]
+    ) -> None:
+        self._get_category_children_handler = handler
 
 
 ###################################################################################
@@ -288,7 +306,7 @@ class CategoryDeletionDialog(QtWidgets.QDialog):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.setWindowTitle("New category creation")
+        self.setWindowTitle("Category deletion")
 
         QBtn = (
             QtWidgets.QDialogButtonBox.StandardButton.Ok

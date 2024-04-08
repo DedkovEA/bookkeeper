@@ -3,6 +3,7 @@ from pony.orm import Database, Required, PrimaryKey, Optional, Set
 from bookkeeper.models.abstract_model import AbstractModel
 from bookkeeper.models.pony_models.pony_category_model import PonyCategoryModel
 from bookkeeper.models.pony_models.pony_expenses_model import PonyExpensesModel
+from bookkeeper.models.pony_models.pony_budget_model import PonyBudgetModel
 
 
 def define_database(**dbparams) -> Database:
@@ -17,10 +18,11 @@ def define_database(**dbparams) -> Database:
         children = Set("Category", reverse="parent")
 
     class Budget(db.Entity):
-        preset = PrimaryKey(str)
-        daily = Optional(int, unsigned=True)
-        weekly = Optional(int)
-        monthly = Optional(int, unsigned=True)
+        id = PrimaryKey(int, auto=True, unsigned=True)
+        preset = Required(str, unique=True)
+        daily = Optional(float)
+        weekly = Optional(float)
+        monthly = Optional(float)
 
     class Expense(db.Entity):
         id = PrimaryKey(int, auto=True, nullable=False)
@@ -41,3 +43,4 @@ class PonyModel(AbstractModel):
         self.db = define_database(**dbparams)
         self.category_model = PonyCategoryModel(self, self.db)
         self.expenses_model = PonyExpensesModel(self, self.db)
+        self.budget_model = PonyBudgetModel(self, self.db)
